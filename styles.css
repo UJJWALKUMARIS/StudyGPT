@@ -49,7 +49,7 @@ body{
 
 .ai-chat-area{
     width: 90%;
-    height: au
+    padding: 20px;
     background-color: white;
     position: relative;
     color: black;
