@@ -38,6 +38,7 @@ body{
     height: auto;
     padding: 20px;
     background-color: green;
+    right: 20px;
     color: black(255, 255, 255, 0.765);
     border-radius: 40px 0px 40px 40px;
     box-shadow: 3px 3px 3px 3px black;
@@ -48,8 +49,7 @@ body{
 
 .ai-chat-area{
     width: 90%;
-    height: auto;
-    padding-right: 20px;
+    height: au
     background-color: white;
     position: relative;
     color: black;
