@@ -28,7 +28,7 @@ body{
 }
 
 .ai-chat-box{
-    width: 90%;
+    width: 60%;
     position: relative;
     padding-right: 55px;
 }
@@ -47,7 +47,7 @@ body{
 }
 
 .ai-chat-area{
-    width: 90%;
+    width: 100%;
     height: auto;
     padding: 20px;
     background-color: white;
