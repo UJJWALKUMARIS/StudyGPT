@@ -21,14 +21,14 @@ body{
 }
 
 .user-chat-box{
-    width: 90%;
+    width: 60%;
     position: relative;
     left: 40%;
     margin-top: 20px;
 }
 
 .ai-chat-box{
-    width: 60%;
+    width: 90%;
     position: relative;
     padding-right: 55px;
 }
