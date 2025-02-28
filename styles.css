@@ -116,3 +116,17 @@ body{
     height: 100%;
     border-radius: 50%;
 }
+
+@media (max-width:600px) {
+    .user-chat-box{
+        width: 80%;
+        height: auto;
+        left: 20%;
+    }
+
+    .ai-chat-box{
+        width: 80%;
+        height: auto;
+        right: 20%;
+    }
+}
