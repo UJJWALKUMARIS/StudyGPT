@@ -28,9 +28,9 @@ body{
 }
 
 .ai-chat-box{
-    width: 60%;
+    width: 90%;
     position: relative;
-    padding-right: 100px;
+    left: 0%;
 }
 
 .user-chat-area{
@@ -38,7 +38,6 @@ body{
     height: auto;
     padding: 20px;
     background-color: green;
-    right: 20px;
     color: black(255, 255, 255, 0.765);
     border-radius: 40px 0px 40px 40px;
     box-shadow: 3px 3px 3px 3px black;
@@ -49,9 +48,11 @@ body{
 
 .ai-chat-area{
     width: 90%;
+    height: auto;
     padding: 20px;
     background-color: white;
     position: relative;
+    left: 10%;
     color: black;
     border-radius: 0px 40px 40px 40px;
     box-shadow: 3px 3px 3px 3px black;
