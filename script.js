@@ -87,7 +87,7 @@ function hendlechatResponce(message){
 
 
     setTimeout(()=>{
-        let html=`<img src="ai.avif" alt="" id="aiImage" width="13%">
+        let html=`<img src="ai.avif" alt="" id="aiImage" width="8%">
             <div class="ai-chat-area">
             <img src="loding.gif" alt="" class="loding" width="50px">
             </div>`
