@@ -86,46 +86,33 @@ async function processCommand(message) {
         message.includes("what is your origin") || 
         message.includes("who developed you")
     ) {
-        speak("I am StudyGPT, Created by Ujjwal Kumar.");
-    }
-
+        speak("I am StudyGPT, made by Ujjwal Kumar.");
+    } 
+    
     else if (message.includes("open youtube")) {
         speak("Opening YouTube");
         window.open("https://www.youtube.com", "_blank");
-    }
-
+    } 
+    
     else if (message.includes("open facebook")) {
         speak("Opening Facebook");
         window.open("https://www.facebook.com", "_blank");
-    }
-
+    } 
+    
     else if (message.includes("open google")) {
         speak("Opening Google");
         window.open("https://www.google.com", "_blank");
-    }
-
+    } 
+    
     else if (message.includes("open insta") || message.includes("open instagram")) {
         speak("Opening Instagram");
         window.open("https://www.instagram.com", "_blank");
-    }
-
+    } 
+    
     else if (message.includes("what is your name")) {
         speak("My name is StudyGPT.");
     } 
-
-    else if (message.includes("ujjwal")) {
-        speak("Yes I am Created by Ujjwal Kumar.");
-    }
-
-    else if (
-        message.includes("you formed")||
-        message.includes("formed you")||
-        message.includes("form you") ||
-        message.includes("you form")
-    ) {
-        speak("I am formed  by Ujjwal kumar")
-    }
-
+    
     else {
         let aiResponse = await fetchGeminiAI(message);
         speak(aiResponse);
@@ -141,13 +128,13 @@ async function fetchGeminiAI(prompt) {
         let response = await fetch(API_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ prompt: prompt }),
+            body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: prompt }] }] }),
         });
 
         let data = await response.json();
 
-        if (data && data.response) {
-            responseText = data.response;
+        if (data && data.candidates && data.candidates.length > 0) {
+            responseText = data.candidates[0].content.parts[0].text;
         }
     } catch (error) {
         console.error("Error fetching AI response:", error);
