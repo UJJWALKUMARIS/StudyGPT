@@ -38,7 +38,33 @@ let text = aiChatBox.querySelector(".ai-chat-area")
         let response= await fetch(Api_Url,RequestOption)
         let data= await response.json()
         let apiResponse = data.candidates[0].content.parts[0].text.replace(/\*\*(.*?)\*\*/g,"$1").trim()
-        
+        if (user.userdata.toLowerCase().includes("hello")) {
+            apiResponse = `Hello, how can I help you?`
+        }
+
+        else if (
+                user.userdata.toLowerCase().includes("who are you")||
+                user.userdata.toLowerCase().includes("who made you")||
+                user.userdata.toLowerCase().includes("who created you")||
+                user.userdata.toLowerCase().includes("who is your creator")||
+                user.userdata.toLowerCase().includes("who is your origin")||
+                user.userdata.toLowerCase().includes("who developed you")
+            ) {
+            apiResponse = `I am StudyGPT, created by Ujjwal Kumar.`
+        }
+
+        else if (user.userdata.toLowerCase().includes("ujjwal")) {
+            apiResponse = `Yes, I am formed by Ujjwal kumar`
+        }
+
+        else if (
+            user.userdata.toLowerCase().includes("you formed")||
+            user.userdata.toLowerCase().includes("formed you")||
+            user.userdata.toLowerCase().includes("from you")||
+            user.userdata.toLowerCase().includes("you form")
+        ) {
+            apiResponse = ` I am formed by Ujjwal kumar`
+        }
 
         text.innerHTML=apiResponse
 
