@@ -102,7 +102,7 @@ async function processCommand(message) {
     else if (message.includes("open google")) {
         speak("Opening Google");
         window.open("https://www.google.com", "_blank");
-    } 
+    }
     
     else if (message.includes("open insta") || message.includes("open instagram")) {
         speak("Opening Instagram");
@@ -111,7 +111,20 @@ async function processCommand(message) {
     
     else if (message.includes("what is your name")) {
         speak("My name is StudyGPT.");
-    } 
+    }
+    
+    else if (message.includes("ujjwal")) {
+        speak("Yes I am made by Ujjwal kumar")
+    }
+
+    else if (
+        message.includes("you fomred")||
+        message.includes("fomred you")||
+        message.includes("you form")||
+        message.includes("form you")
+    ) {
+        speak("I am StudyGPT, made by Ujjwal Kumar.");
+    }
     
     else {
         let aiResponse = await fetchGeminiAI(message);
