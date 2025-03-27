@@ -119,7 +119,7 @@ async function processCommand(message) {
 
     else if (
         message.includes("you fomred")||
-        message.includes("fomred you")||
+        message.includes("formed you")||
         message.includes("you form")||
         message.includes("form you")
     ) {
