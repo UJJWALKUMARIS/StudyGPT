@@ -133,7 +133,7 @@ async function processCommand(message) {
 }
 
 async function fetchGeminiAI(prompt) {
-    const API_URL = "https://your-backend-server.com/api/gemini";
+    const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyA6UD8HwhHg37n3Yzsrt13axts3Zm4_fcU";
 
     let responseText = "I'm sorry, I couldn't generate a response.";
 
