@@ -1,24 +1,78 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StudyGpt</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="icon" href="ai.avif" type="image/icon type">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>StudyGpt</title>
+  <link rel="icon" href="ai.avif" type="image/icon type" />
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- KaTeX for math rendering -->
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css"
+  />
+  <script
+    defer
+    src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"
+  ></script>
+  <script
+    defer
+    src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"
+  ></script>
+
+  <!-- Marked.js for Markdown parsing -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
-    <div class="chat-container">
-        </div>
+  <div class="chat-header">
+    <h2>StudyGpt</h2>
+    <button id="clearChat">🗑 Clear Chat</button>
+  </div>
+
+  <div class="container">
+    <!-- Sidebar with new conversation button -->
+    <div class="sidebar">
+      <div class="new-conversation-container">
+        <button id="newConversationBtn">+ New Conversation</button>
+      </div>
+      <div id="sidebar"></div>
     </div>
-    <div class="prompt-area">
-        <input type="text" id="prompt" placeholder="Message......" autocomplete="off">
-        <button id="image"><img src="img.svg" alt=""><input type="file" accept="images/*" hidden></button>
-        <button id="submit"><img src="upl.svg" alt=""></button>
+
+    <!-- Main chat area -->
+    <div class="chat-area">
+      <div class="chat-container" id="chat-container"></div>
+
+      <div class="prompt-area">
+        <input
+          type="text"
+          id="prompt"
+          placeholder="Message......"
+          autocomplete="off"
+        />
+        <button id="image">
+          <img src="img.svg" alt="" />
+          <input type="file" accept="image/*" hidden />
+        </button>
+        <button id="submit"><img src="upl.svg" alt="" /></button>
         <form action="voice.html">
-            <button><center><img src="voice-assistant_8006314.png" alt="" width="60%" height="60%"></center></button>
+          <button type="submit">
+            <center>
+              <img
+                src="voice-assistant_8006314.png"
+                alt=""
+                width="60%"
+                height="60%"
+              />
+            </center>
+          </button>
         </form>
+      </div>
     </div>
-    <script src="script.js"></script>
+  </div>
+
+  <script src="script.js" defer></script>
 </body>
 </html>
