@@ -27,13 +27,23 @@
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
+  <!-- Header -->
   <div class="chat-header">
-    <h2>StudyGpt</h2>
-    <button id="clearChat">🗑 Clear Chat</button>
+    <div class="header-left">
+      <button id="menuToggle" aria-label="Toggle sidebar">☰</button>
+      <h2>StudyGpt</h2>
+    </div>
+    <div class="header-actions">
+      <button id="darkModeToggle" aria-label="Toggle theme">🌙</button>
+      <button id="clearChat" aria-label="Clear chat">🗑</button>
+    </div>
   </div>
 
+  <!-- Overlay for sidebar on mobile -->
+  <div id="overlay"></div>
+
   <div class="container">
-    <!-- Sidebar with new conversation button -->
+    <!-- Sidebar -->
     <div class="sidebar">
       <div class="new-conversation-container">
         <button id="newConversationBtn">+ New Conversation</button>
@@ -41,7 +51,7 @@
       <div id="sidebar"></div>
     </div>
 
-    <!-- Main chat area -->
+    <!-- Chat Area -->
     <div class="chat-area">
       <div class="chat-container" id="chat-container"></div>
 
@@ -52,21 +62,19 @@
           placeholder="Message......"
           autocomplete="off"
         />
-        <button id="image">
-          <img src="img.svg" alt="" />
+        <button id="image" title="Attach image">
+          <img src="img.svg" alt="Attach" />
           <input type="file" accept="image/*" hidden />
         </button>
-        <button id="submit"><img src="upl.svg" alt="" /></button>
+        <button id="submit" title="Send"><img src="upl.svg" alt="Send" /></button>
         <form action="voice.html">
-          <button type="submit">
-            <center>
-              <img
-                src="voice-assistant_8006314.png"
-                alt=""
-                width="60%"
-                height="60%"
-              />
-            </center>
+          <button type="submit" title="Voice">
+            <img
+              src="voice-assistant_8006314.png"
+              alt="Voice"
+              width="24"
+              height="24"
+            />
           </button>
         </form>
       </div>
