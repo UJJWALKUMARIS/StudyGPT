@@ -1,4 +1,5 @@
 // ================= CONFIG =================
+// Replace with your real key. Consider loading from server/env for security.
 const API_KEY = "AIzaSyD0_2tZRS847JSffiZ6m5RwxX2Jc3c57gQ";
 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
 
@@ -12,6 +13,10 @@ const image = imageBtn.querySelector("img");
 const sidebar = document.getElementById("sidebar");
 const newConversationBtn = document.getElementById("newConversationBtn");
 const clearChatBtn = document.getElementById("clearChat");
+// Header controls
+const menuToggle = document.getElementById("menuToggle");
+const overlay = document.getElementById("overlay");
+const darkToggle = document.getElementById("darkModeToggle");
 
 // ================= GLOBALS =================
 let conversations = JSON.parse(localStorage.getItem("conversations")) || [];
@@ -21,11 +26,30 @@ if (!selectedConversationId && conversations.length) {
   selectedConversationId = conversations[0].id;
 }
 
+// ================= THEME =================
+(function initTheme() {
+  const saved = localStorage.getItem("theme");
+  if (saved === "dark") {
+    document.body.classList.add("dark");
+    if (darkToggle) darkToggle.textContent = "🌞";
+  } else {
+    if (darkToggle) darkToggle.textContent = "🌙";
+  }
+})();
+
+if (darkToggle) {
+  darkToggle.addEventListener("click", () => {
+    document.body.classList.toggle("dark");
+    const isDark = document.body.classList.contains("dark");
+    darkToggle.textContent = isDark ? "🌞" : "🌙";
+    localStorage.setItem("theme", isDark ? "dark" : "light");
+  });
+}
+
 // ================= HELPERS =================
 function saveConversations() {
   localStorage.setItem("conversations", JSON.stringify(conversations));
 }
-
 function saveSelectedConversation() {
   localStorage.setItem("selectedConversationId", selectedConversationId);
 }
@@ -58,6 +82,9 @@ function renderSidebar() {
       saveSelectedConversation();
       renderSidebar();
       renderConversation();
+      // Close sidebar on mobile tap
+      sidebarEl.classList.remove("active");
+      overlay.classList.remove("active");
     };
     sidebar.appendChild(convDiv);
   });
@@ -79,20 +106,49 @@ function renderConversation() {
   chatContainer.scrollTop = chatContainer.scrollHeight;
 }
 
+// ================= UTIL: Create avatar element =================
+function makeAvatar(src, alt) {
+  const img = document.createElement("img");
+  img.className = "chat-avatar";
+  img.src = src;
+  img.alt = alt;
+  return img;
+}
+
 // ================= ADD MESSAGE TO CHAT =================
 function addMessageToChat(text, role, file = null) {
   const box = document.createElement("div");
   box.className = role === "user" ? "user-chat-box" : "ai-chat-box";
 
-  const area = document.createElement("div");
-  area.className = role === "user" ? "user-chat-area" : "ai-chat-area";
+  // Avatars (provide your own 'user.png' or fallback emoji data URL)
+  const avatarSrc = role === "user" ? "user.png" : "ai.avif";
+  const avatar = makeAvatar(avatarSrc, role === "user" ? "User" : "AI");
 
-  let contentHTML = marked.parse(text); // Markdown parsing
+  const bubble = document.createElement("div");
+  bubble.className = "bubble";
 
-  // Render KaTeX math if present
+  // Copy button for full AI responses
+  if (role !== "user") {
+    const copyBtn = document.createElement("button");
+    copyBtn.className = "ai-copy";
+    copyBtn.textContent = "Copy";
+    copyBtn.addEventListener("click", () => {
+      const plain = bubble.innerText; // copies without HTML
+      navigator.clipboard.writeText(plain).then(() => {
+        copyBtn.textContent = "Copied!";
+        setTimeout(() => (copyBtn.textContent = "Copy"), 1500);
+      });
+    });
+    bubble.appendChild(copyBtn);
+  }
+
+  // Render Markdown + KaTeX
+  let contentHTML = marked.parse(text || "");
+  const holder = document.createElement("div");
+  holder.innerHTML = contentHTML;
+
   try {
-    area.innerHTML = contentHTML;
-    renderMathInElement(area, {
+    renderMathInElement(holder, {
       delimiters: [
         { left: "$$", right: "$$", display: true },
         { left: "$", right: "$", display: false },
@@ -100,57 +156,53 @@ function addMessageToChat(text, role, file = null) {
         { left: "\\[", right: "\\]", display: true },
       ],
     });
-  } catch {
-    area.innerHTML = contentHTML;
-  }
+  } catch { /* ignore */ }
 
-  // Append image if available
+  bubble.appendChild(holder);
+
+  // Attached image preview
   if (file) {
     const imgEl = document.createElement("img");
     imgEl.src = `data:${file.mime_type};base64,${file.data}`;
     imgEl.className = "chooseimg";
-    area.appendChild(imgEl);
+    imgEl.style.maxWidth = "240px";
+    imgEl.style.borderRadius = "10px";
+    imgEl.style.marginTop = "8px";
+    bubble.appendChild(imgEl);
   }
 
-  box.appendChild(area);
+  box.appendChild(avatar);
+  box.appendChild(bubble);
   chatContainer.appendChild(box);
   chatContainer.scrollTop = chatContainer.scrollHeight;
 }
 
 // ================= GENERATE AI RESPONSE =================
 async function generateResponse(aiChatBox, message) {
-  const textEl = aiChatBox.querySelector(".ai-chat-area");
-
-  // Find current conversation
   const conv = conversations.find((c) => c.id === selectedConversationId);
   if (!conv) return;
 
-  // Build conversation history for API
   const parts = conv.messages.map((m) => ({
     text: `${m.role === "user" ? "User" : "AI"}: ${m.text}`,
   }));
 
-  // Add image data if present on last message
   if (message.file?.data) {
     parts.push({ inline_data: message.file });
   }
 
-  // Prepare request
   const requestOptions = {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      contents: [{ parts }],
-    }),
+    body: JSON.stringify({ contents: [{ parts }] }),
   };
 
   try {
-    let response = await fetch(API_URL, requestOptions);
-    let data = await response.json();
+    const response = await fetch(API_URL, requestOptions);
+    const data = await response.json();
+    let apiResponse =
+      data?.candidates?.[0]?.content?.parts?.[0]?.text || "No response";
 
-    let apiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || "No response";
-
-    // Custom canned responses
+    // Simple custom replies
     const userText = message.text.toLowerCase();
     if (userText.includes("hello")) {
       apiResponse = "Hello, how can I help you?";
@@ -165,33 +217,20 @@ async function generateResponse(aiChatBox, message) {
       apiResponse = "I am StudyGPT, created by Ujjwal Kumar.";
     }
 
-    // Save AI message
     const aiMessage = { role: "ai", text: apiResponse };
     conv.messages.push(aiMessage);
     saveConversations();
 
-    // Show typing effect
-    typeText(textEl, apiResponse, 20);
+    // Render to chat
+    addMessageToChat(apiResponse, "ai", null);
   } catch (error) {
     console.error(error);
-    textEl.innerHTML = "⚠️ Error fetching response.";
+    addMessageToChat("⚠️ Error fetching response.", "ai");
   } finally {
     chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: "smooth" });
     image.src = "img.svg";
     image.classList.remove("size");
   }
-}
-
-// ================= TYPING EFFECT =================
-function typeText(element, text, speed = 20) {
-  let index = 0;
-  element.innerHTML = "";
-
-  const interval = setInterval(() => {
-    element.innerHTML += text.charAt(index);
-    index++;
-    if (index >= text.length) clearInterval(interval);
-  }, speed);
 }
 
 // ================= HANDLE USER MESSAGE =================
@@ -205,7 +244,6 @@ function handleUserMessage() {
     return;
   }
 
-  // Save user message
   const userMessage = {
     role: "user",
     text: messageText,
@@ -216,7 +254,6 @@ function handleUserMessage() {
   conv.messages.push(userMessage);
   saveConversations();
 
-  // Add user message box
   addMessageToChat(userMessage.text, "user", userMessage.file);
 
   prompt.value = "";
@@ -225,25 +262,12 @@ function handleUserMessage() {
   image.src = "img.svg";
   image.classList.remove("size");
 
-  // Add AI chat box placeholder with loading gif
-  const aiChatBox = document.createElement("div");
-  aiChatBox.className = "ai-chat-box";
-  aiChatBox.innerHTML = `
-    <img src="ai.avif" alt="" id="aiImage" width="8%" />
-    <div class="ai-chat-area">
-      <img src="loding.gif" alt="" class="loding" width="50px" />
-    </div>
-  `;
-  chatContainer.appendChild(aiChatBox);
-  chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: "smooth" });
-
-  generateResponse(aiChatBox, userMessage);
+  // Generate AI reply
+  generateResponse(null, userMessage);
 }
 
 // ================= USER IMAGE FILE DATA =================
-let user = {
-  file: { mime_type: null, data: null },
-};
+let user = { file: { mime_type: null, data: null } };
 
 imageInput.addEventListener("change", () => {
   const file = imageInput.files[0];
@@ -265,22 +289,19 @@ imageBtn.addEventListener("click", () => {
 
 // ================= EVENT LISTENERS =================
 submitBtn.addEventListener("click", handleUserMessage);
-
 prompt.addEventListener("keydown", (e) => {
   if (e.key === "Enter") {
     e.preventDefault();
     handleUserMessage();
   }
 });
-
 newConversationBtn.addEventListener("click", createNewConversation);
 
 clearChatBtn.addEventListener("click", () => {
   if (!selectedConversationId) return;
-
-  const convIndex = conversations.findIndex((c) => c.id === selectedConversationId);
-  if (convIndex !== -1) {
-    conversations.splice(convIndex, 1);
+  const idx = conversations.findIndex((c) => c.id === selectedConversationId);
+  if (idx !== -1) {
+    conversations.splice(idx, 1);
     selectedConversationId = conversations.length ? conversations[0].id : null;
     saveConversations();
     saveSelectedConversation();
@@ -296,3 +317,16 @@ if (!conversations.length) {
   renderSidebar();
   renderConversation();
 }
+
+// ================= SIDEBAR TOGGLE (Mobile) =================
+const sidebarEl = document.querySelector(".sidebar");
+
+menuToggle.addEventListener("click", () => {
+  sidebarEl.classList.toggle("active");
+  overlay.classList.toggle("active");
+});
+
+overlay.addEventListener("click", () => {
+  sidebarEl.classList.remove("active");
+  overlay.classList.remove("active");
+});
