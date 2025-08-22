@@ -1,6 +1,6 @@
 // ================= CONFIG =================
 // Replace with your real key. Consider loading from server/env for security.
-const API_KEY = "AIzaSyD0_2tZRS847JSffiZ6m5RwxX2Jc3c57gQ";
+const API_KEY = "API_KEY";
 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
 
 // ================= DOM ELEMENTS =================
@@ -330,3 +330,4 @@ overlay.addEventListener("click", () => {
   sidebarEl.classList.remove("active");
   overlay.classList.remove("active");
 });
+
