@@ -1,6 +1,5 @@
 // ================= CONFIG =================
-// Replace with your real key. Consider loading from server/env for security.
-const API_KEY = "API_KEY";
+const API_KEY = "AIzaSyBx_1zTjVkpYrPHgU8spzrtiVVk4IiTv_0"; // replace with your Gemini API key
 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
 
 // ================= DOM ELEMENTS =================
@@ -13,37 +12,17 @@ const image = imageBtn.querySelector("img");
 const sidebar = document.getElementById("sidebar");
 const newConversationBtn = document.getElementById("newConversationBtn");
 const clearChatBtn = document.getElementById("clearChat");
-// Header controls
+const darkToggle = document.getElementById("darkModeToggle");
 const menuToggle = document.getElementById("menuToggle");
 const overlay = document.getElementById("overlay");
-const darkToggle = document.getElementById("darkModeToggle");
 
 // ================= GLOBALS =================
 let conversations = JSON.parse(localStorage.getItem("conversations")) || [];
 let selectedConversationId = localStorage.getItem("selectedConversationId") || null;
+let user = { file: { mime_type: null, data: null } };
 
 if (!selectedConversationId && conversations.length) {
   selectedConversationId = conversations[0].id;
-}
-
-// ================= THEME =================
-(function initTheme() {
-  const saved = localStorage.getItem("theme");
-  if (saved === "dark") {
-    document.body.classList.add("dark");
-    if (darkToggle) darkToggle.textContent = "🌞";
-  } else {
-    if (darkToggle) darkToggle.textContent = "🌙";
-  }
-})();
-
-if (darkToggle) {
-  darkToggle.addEventListener("click", () => {
-    document.body.classList.toggle("dark");
-    const isDark = document.body.classList.contains("dark");
-    darkToggle.textContent = isDark ? "🌞" : "🌙";
-    localStorage.setItem("theme", isDark ? "dark" : "light");
-  });
 }
 
 // ================= HELPERS =================
@@ -53,13 +32,8 @@ function saveConversations() {
 function saveSelectedConversation() {
   localStorage.setItem("selectedConversationId", selectedConversationId);
 }
-
 function createNewConversation() {
-  const newConv = {
-    id: Date.now().toString(),
-    title: "New Conversation",
-    messages: [],
-  };
+  const newConv = { id: Date.now().toString(), title: "New Conversation", messages: [] };
   conversations.unshift(newConv);
   selectedConversationId = newConv.id;
   saveConversations();
@@ -71,7 +45,6 @@ function createNewConversation() {
 // ================= RENDER SIDEBAR =================
 function renderSidebar() {
   sidebar.innerHTML = "";
-
   conversations.forEach((conv) => {
     const convDiv = document.createElement("div");
     convDiv.className = "sidebar-chat";
@@ -82,9 +55,6 @@ function renderSidebar() {
       saveSelectedConversation();
       renderSidebar();
       renderConversation();
-      // Close sidebar on mobile tap
-      sidebarEl.classList.remove("active");
-      overlay.classList.remove("active");
     };
     sidebar.appendChild(convDiv);
   });
@@ -93,26 +63,11 @@ function renderSidebar() {
 // ================= RENDER CONVERSATION =================
 function renderConversation() {
   chatContainer.innerHTML = "";
-
   if (!selectedConversationId) return;
-
   const conv = conversations.find((c) => c.id === selectedConversationId);
   if (!conv) return;
-
-  conv.messages.forEach((msg) => {
-    addMessageToChat(msg.text, msg.role, msg.file);
-  });
-
+  conv.messages.forEach((msg) => addMessageToChat(msg.text, msg.role, msg.file));
   chatContainer.scrollTop = chatContainer.scrollHeight;
-}
-
-// ================= UTIL: Create avatar element =================
-function makeAvatar(src, alt) {
-  const img = document.createElement("img");
-  img.className = "chat-avatar";
-  img.src = src;
-  img.alt = alt;
-  return img;
 }
 
 // ================= ADD MESSAGE TO CHAT =================
@@ -120,35 +75,19 @@ function addMessageToChat(text, role, file = null) {
   const box = document.createElement("div");
   box.className = role === "user" ? "user-chat-box" : "ai-chat-box";
 
-  // Avatars (provide your own 'user.png' or fallback emoji data URL)
-  const avatarSrc = role === "user" ? "user.png" : "ai.avif";
-  const avatar = makeAvatar(avatarSrc, role === "user" ? "User" : "AI");
+  const avatar = document.createElement("img");
+  avatar.className = "chat-avatar";
+  avatar.src = role === "user" ? "user.png" : "ai.avif"; // ⚠️ add user.png image
+  box.appendChild(avatar);
 
   const bubble = document.createElement("div");
   bubble.className = "bubble";
 
-  // Copy button for full AI responses
-  if (role !== "user") {
-    const copyBtn = document.createElement("button");
-    copyBtn.className = "ai-copy";
-    copyBtn.textContent = "Copy";
-    copyBtn.addEventListener("click", () => {
-      const plain = bubble.innerText; // copies without HTML
-      navigator.clipboard.writeText(plain).then(() => {
-        copyBtn.textContent = "Copied!";
-        setTimeout(() => (copyBtn.textContent = "Copy"), 1500);
-      });
-    });
-    bubble.appendChild(copyBtn);
-  }
-
-  // Render Markdown + KaTeX
-  let contentHTML = marked.parse(text || "");
-  const holder = document.createElement("div");
-  holder.innerHTML = contentHTML;
-
+  // Parse markdown + KaTeX
+  let contentHTML = marked.parse(text);
   try {
-    renderMathInElement(holder, {
+    bubble.innerHTML = contentHTML;
+    renderMathInElement(bubble, {
       delimiters: [
         { left: "$$", right: "$$", display: true },
         { left: "$", right: "$", display: false },
@@ -156,22 +95,33 @@ function addMessageToChat(text, role, file = null) {
         { left: "\\[", right: "\\]", display: true },
       ],
     });
-  } catch { /* ignore */ }
+  } catch {
+    bubble.innerHTML = contentHTML;
+  }
 
-  bubble.appendChild(holder);
-
-  // Attached image preview
+  // Attach image if present
   if (file) {
     const imgEl = document.createElement("img");
     imgEl.src = `data:${file.mime_type};base64,${file.data}`;
     imgEl.className = "chooseimg";
-    imgEl.style.maxWidth = "240px";
-    imgEl.style.borderRadius = "10px";
-    imgEl.style.marginTop = "8px";
     bubble.appendChild(imgEl);
   }
 
-  box.appendChild(avatar);
+  // ✅ Add copy button under AI responses
+  if (role !== "user") {
+    const copyBtn = document.createElement("button");
+    copyBtn.className = "ai-copy";
+    copyBtn.textContent = "Copy response";
+    copyBtn.addEventListener("click", () => {
+      const plain = bubble.innerText; // only text (no HTML tags)
+      navigator.clipboard.writeText(plain).then(() => {
+        copyBtn.textContent = "Copied!";
+        setTimeout(() => (copyBtn.textContent = "Copy response"), 1500);
+      });
+    });
+    bubble.appendChild(copyBtn);
+  }
+
   box.appendChild(bubble);
   chatContainer.appendChild(box);
   chatContainer.scrollTop = chatContainer.scrollHeight;
@@ -179,53 +129,65 @@ function addMessageToChat(text, role, file = null) {
 
 // ================= GENERATE AI RESPONSE =================
 async function generateResponse(aiChatBox, message) {
+  const textEl = aiChatBox.querySelector(".bubble");
   const conv = conversations.find((c) => c.id === selectedConversationId);
   if (!conv) return;
 
   const parts = conv.messages.map((m) => ({
     text: `${m.role === "user" ? "User" : "AI"}: ${m.text}`,
   }));
-
-  if (message.file?.data) {
-    parts.push({ inline_data: message.file });
-  }
-
-  const requestOptions = {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ contents: [{ parts }] }),
-  };
+  if (message.file?.data) parts.push({ inline_data: message.file });
 
   try {
-    const response = await fetch(API_URL, requestOptions);
-    const data = await response.json();
-    let apiResponse =
-      data?.candidates?.[0]?.content?.parts?.[0]?.text || "No response";
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ contents: [{ parts }] }),
+    });
+    const data = await res.json();
 
-    // Simple custom replies
+    let apiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || "⚠️ No response";
+
+    // quick custom replies
     const userText = message.text.toLowerCase();
-    if (userText.includes("hello")) {
-      apiResponse = "Hello, how can I help you?";
-    } else if (
-      userText.includes("who are you") ||
-      userText.includes("who made you") ||
-      userText.includes("who created you") ||
-      userText.includes("who is your founder") ||
-      userText.includes("who is your creator") ||
-      userText.includes("founder")
-    ) {
-      apiResponse = "I am StudyGPT, created by Ujjwal Kumar.";
-    }
+    if (userText.includes("hello")) apiResponse = "Hello, how can I help you?";
+    if (userText.includes("who are you")) apiResponse = "I am StudyGPT, created by Ujjwal Kumar.";
 
     const aiMessage = { role: "ai", text: apiResponse };
     conv.messages.push(aiMessage);
     saveConversations();
 
-    // Render to chat
-    addMessageToChat(apiResponse, "ai", null);
-  } catch (error) {
-    console.error(error);
-    addMessageToChat("⚠️ Error fetching response.", "ai");
+    // ✅ Render AI answer with markdown & KaTeX
+    let contentHTML = marked.parse(apiResponse);
+    try {
+      textEl.innerHTML = contentHTML;
+      renderMathInElement(textEl, {
+        delimiters: [
+          { left: "$$", right: "$$", display: true },
+          { left: "$", right: "$", display: false },
+          { left: "\\(", right: "\\)", display: false },
+          { left: "\\[", right: "\\]", display: true },
+        ],
+      });
+    } catch {
+      textEl.innerHTML = contentHTML;
+    }
+
+    // ✅ Add copy button below
+    const copyBtn = document.createElement("button");
+    copyBtn.className = "ai-copy";
+    copyBtn.textContent = "Copy response";
+    copyBtn.addEventListener("click", () => {
+      const plain = textEl.innerText;
+      navigator.clipboard.writeText(plain).then(() => {
+        copyBtn.textContent = "Copied!";
+        setTimeout(() => (copyBtn.textContent = "Copy response"), 1500);
+      });
+    });
+    textEl.appendChild(copyBtn);
+  } catch (e) {
+    console.error(e);
+    textEl.innerHTML = "⚠️ Error fetching response.";
   } finally {
     chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: "smooth" });
     image.src = "img.svg";
@@ -238,18 +200,16 @@ function handleUserMessage() {
   const messageText = prompt.value.trim();
   if (!messageText) return;
 
-  const conv = conversations.find((c) => c.id === selectedConversationId);
+  let conv = conversations.find((c) => c.id === selectedConversationId);
   if (!conv) {
     createNewConversation();
-    return;
+    conv = conversations.find((c) => c.id === selectedConversationId);
   }
 
   const userMessage = {
     role: "user",
     text: messageText,
-    file: user.file.data
-      ? { mime_type: user.file.mime_type, data: user.file.data }
-      : null,
+    file: user.file.data ? { mime_type: user.file.mime_type, data: user.file.data } : null,
   };
   conv.messages.push(userMessage);
   saveConversations();
@@ -257,22 +217,27 @@ function handleUserMessage() {
   addMessageToChat(userMessage.text, "user", userMessage.file);
 
   prompt.value = "";
-  user.file.data = null;
-  user.file.mime_type = null;
+  user.file = { mime_type: null, data: null };
   image.src = "img.svg";
   image.classList.remove("size");
 
-  // Generate AI reply
-  generateResponse(null, userMessage);
+  // AI typing placeholder
+  const aiChatBox = document.createElement("div");
+  aiChatBox.className = "ai-chat-box";
+  aiChatBox.innerHTML = `
+    <img src="ai.avif" class="chat-avatar" />
+    <div class="bubble"><img src="loding.gif" alt="loading" width="40"></div>
+  `;
+  chatContainer.appendChild(aiChatBox);
+  chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: "smooth" });
+
+  generateResponse(aiChatBox, userMessage);
 }
 
-// ================= USER IMAGE FILE DATA =================
-let user = { file: { mime_type: null, data: null } };
-
+// ================= FILE UPLOAD =================
 imageInput.addEventListener("change", () => {
   const file = imageInput.files[0];
   if (!file) return;
-
   const reader = new FileReader();
   reader.onload = (e) => {
     const base64String = e.target.result.split(",")[1];
@@ -282,21 +247,12 @@ imageInput.addEventListener("change", () => {
   };
   reader.readAsDataURL(file);
 });
-
-imageBtn.addEventListener("click", () => {
-  imageInput.click();
-});
+imageBtn.addEventListener("click", () => imageInput.click());
 
 // ================= EVENT LISTENERS =================
 submitBtn.addEventListener("click", handleUserMessage);
-prompt.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") {
-    e.preventDefault();
-    handleUserMessage();
-  }
-});
+prompt.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); handleUserMessage(); } });
 newConversationBtn.addEventListener("click", createNewConversation);
-
 clearChatBtn.addEventListener("click", () => {
   if (!selectedConversationId) return;
   const idx = conversations.findIndex((c) => c.id === selectedConversationId);
@@ -310,26 +266,29 @@ clearChatBtn.addEventListener("click", () => {
   }
 });
 
-// ================= INITIALIZE =================
-if (!conversations.length) {
-  createNewConversation();
-} else {
-  renderSidebar();
-  renderConversation();
+// ================= INIT =================
+if (!conversations.length) createNewConversation(); else { renderSidebar(); renderConversation(); }
+
+// ================= DARK MODE =================
+if (localStorage.getItem("theme") === "dark") {
+  document.body.classList.add("dark");
+  darkToggle.textContent = "🌞";
 }
+darkToggle.addEventListener("click", () => {
+  document.body.classList.toggle("dark");
+  if (document.body.classList.contains("dark")) {
+    darkToggle.textContent = "🌞"; localStorage.setItem("theme", "dark");
+  } else {
+    darkToggle.textContent = "🌙"; localStorage.setItem("theme", "light");
+  }
+});
 
 // ================= SIDEBAR TOGGLE (Mobile) =================
-const sidebarEl = document.querySelector(".sidebar");
-
 menuToggle.addEventListener("click", () => {
-  sidebarEl.classList.toggle("active");
+  document.querySelector(".sidebar").classList.toggle("active");
   overlay.classList.toggle("active");
 });
-
 overlay.addEventListener("click", () => {
-  sidebarEl.classList.remove("active");
+  document.querySelector(".sidebar").classList.remove("active");
   overlay.classList.remove("active");
 });
-
-
-
