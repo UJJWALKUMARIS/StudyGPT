@@ -1,4 +1,4 @@
-/* ================== Reset + Base ================== */
+* ================== Reset + Base ================== */
 * {
   margin: 0;
   padding: 0;
@@ -18,7 +18,14 @@
   --border: #ddd;
   --shadow: rgba(0,0,0,0.1);
   --btn-hover: #369ad6;
-  --copy-btn: #4caf50;
+  --copy-btn: #4caf50; /* For general AI copy button */
+
+  /* Code block specific variables */
+  --code-bg: #e0e0e0;
+  --code-text: #333;
+  --code-copy-btn-bg: #4a4a4a;
+  --code-copy-btn-text: #fff;
+  --code-copy-btn-hover: #666;
 }
 
 body.dark {
@@ -32,7 +39,14 @@ body.dark {
   --border: #2a2a2a;
   --shadow: rgba(0,0,0,0.5);
   --btn-hover: #2563eb;
-  --copy-btn: #16a34a;
+  --copy-btn: #16a34a; /* For general AI copy button */
+
+  /* Code block specific variables for dark mode */
+  --code-bg: #2a2a2a;
+  --code-text: #e0e0e0;
+  --code-copy-btn-bg: #555;
+  --code-copy-btn-text: #eee;
+  --code-copy-btn-hover: #777;
 }
 
 body {
@@ -132,6 +146,7 @@ body {
   white-space: nowrap; /* Prevent conversation titles from wrapping */
   overflow: hidden; /* Hide overflowing text */
   text-overflow: ellipsis; /* Add ellipsis for hidden text */
+  margin-bottom: 5px; /* Spacing between chat items */
 }
 .sidebar-chat:hover { background: rgba(0,0,0,0.04); }
 .sidebar-chat.selected {
@@ -164,9 +179,9 @@ body {
   gap: 10px;
   max-width: 95%; /* Allow bubbles to take up most of the width */
   width: fit-content; /* Bubble width adapts to content */
-  white-space: pre-wrap;
-  word-wrap: break-word;
-  word-break: break-word;
+  white-space: normal; /* Resetting, actual wrapping controlled by .bubble */
+  word-wrap: normal; /* Resetting */
+  word-break: normal; /* Resetting */
 }
 
 .chat-avatar {
@@ -188,6 +203,9 @@ body {
   box-shadow: 0 2px 6px var(--shadow);
   position: relative;
   background: var(--bubble-ai);
+  white-space: pre-wrap; /* Preserve whitespace and wrap lines */
+  word-wrap: break-word; /* Break words if lines are too long */
+  word-break: break-word; /* Ensure breaking of long words */
 }
 
 /* User bubble (blue, right) */
@@ -211,24 +229,79 @@ body {
   border-bottom-left-radius: 6px;
 }
 
-/* ✅ Copy button below AI messages */
+/* Existing AI copy button (for non-code text, if implemented) */
 .ai-copy {
-  display: inline-block;
-  margin-top: 8px;
-  padding: 6px 12px;
-  font-size: 0.85rem;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  background: var(--copy-btn);
-  color: white;
-  opacity: 0.9;
-  transition: background 0.2s, opacity 0.2s;
+   display: inline-block;
+   margin-top: 8px;
+   padding: 6px 12px;
+   font-size: 0.85rem;
+   border: none;
+   border-radius: 8px;
+   cursor: pointer;
+   background: var(--copy-btn);
+   color: white;
+   opacity: 0.9;
+   transition: background 0.2s, opacity 0.2s;
 }
 .ai-copy:hover {
-  opacity: 1;
-  background: #2e7d32; /* darker green */
+   opacity: 1;
+   background: #2e7d32; /* darker green */
 }
+
+
+/* ================== Code Block Styling ================== */
+.code-block {
+    position: relative;
+    background: var(--code-bg);
+    color: var(--code-text);
+    border-radius: 8px; /* Slightly smaller radius to fit inside bubble */
+    margin-top: 10px; /* Space from previous text in the same bubble */
+    overflow-x: auto; /* Allow horizontal scrolling for long code lines */
+    padding: 10px 15px; /* Padding for the code content */
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08); /* Subtle shadow for depth */
+}
+
+.code-block pre {
+    margin: 0; /* Remove default pre margin */
+    padding-top: 25px; /* Make space for the copy button */
+    font-size: 0.85rem;
+    line-height: 1.4;
+    white-space: pre-wrap; /* Wrap long lines if possible */
+    word-break: break-word; /* Break words if lines are too long */
+}
+
+.code-block code {
+    font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace; /* Common code fonts */
+}
+
+.code-copy-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: var(--code-copy-btn-bg);
+    color: var(--code-copy-btn-text);
+    border: none;
+    border-radius: 5px;
+    padding: 4px 8px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    display: flex; /* For icon + text if you add it */
+    align-items: center;
+    gap: 4px;
+    z-index: 1; /* Ensure button is above code content */
+}
+
+.code-copy-btn:hover {
+    background: var(--code-copy-btn-hover);
+}
+
+/* Adjust padding for the bubble when it contains a code block */
+/* This class will be added by JS if a bubble contains code */
+.bubble.has-code {
+    padding-bottom: 10px; /* Adjust as needed to accommodate code block's margin */
+}
+
 
 /* ================== Prompt Area ================== */
 .prompt-area {
@@ -238,7 +311,7 @@ body {
   border-top: 1px solid var(--border);
   background: var(--bg-color);
   gap: 8px;
-  flex-shrink: 0; /* Prevents prompt area from shrinking */
+  flex-shrink: 0;
 }
 
 .prompt-area input[type="text"] {
@@ -255,6 +328,7 @@ body {
 .prompt-area input[type="text"]::placeholder { color: #8e8e8e; }
 .prompt-area input[type="text"]:focus { border-color: var(--header-bg); }
 
+/* Apply to all buttons directly in prompt-area */
 .prompt-area button {
   background: var(--header-bg);
   border: none;
@@ -264,8 +338,27 @@ body {
   transition: background 0.2s;
   flex-shrink: 0; /* Prevents button from shrinking */
 }
-.prompt-area button img { width: 20px; height: 20px; }
-.prompt-area button:hover { background: var(--btn-hover); }
+
+/* Ensure the form containing the voice button also behaves as a flex item */
+.prompt-area form {
+    display: flex; /* Make the form itself a flex container */
+    flex-shrink: 0; /* Prevents the form from shrinking beyond its content */
+    margin: 0; /* Remove any default form margins that might be causing issues */
+    padding: 0; /* Remove any default form padding */
+}
+
+/* Target all button images */
+.prompt-area button img,
+.prompt-area form button img {
+    width: 20px;
+    height: 20px;
+}
+/* Apply hover to all buttons */
+.prompt-area button:hover,
+.prompt-area form button:hover {
+    background: var(--btn-hover);
+}
+
 
 /* ================== Scrollbars ================== */
 /* Custom scrollbar for Webkit browsers (Chrome, Safari, Edge) */
@@ -339,8 +432,6 @@ body.dark ::-webkit-scrollbar-thumb {
 
   /* Chat bubbles: Maintain fit-content while ensuring a max-width with padding */
   .user-chat-box, .ai-chat-box {
-    /* Removed 'width: 100%' from here to prevent container stretching.
-       'width: fit-content' from base style is now correctly applied. */
     max-width: calc(100% - 20px); /* Allows for approx. 10px padding on each side */
   }
 
@@ -386,11 +477,13 @@ body.dark ::-webkit-scrollbar-thumb {
         font-size: 0.9rem;
     }
 
-    .prompt-area button {
+    .prompt-area button,
+    .prompt-area form button { /* Target all buttons for padding */
         padding: 8px;
     }
 
-    .prompt-area button img {
+    .prompt-area button img,
+    .prompt-area form button img { /* Target all button images */
         width: 18px;
         height: 18px;
     }
@@ -402,5 +495,84 @@ body.dark ::-webkit-scrollbar-thumb {
 
     .user-chat-box, .ai-chat-box {
         max-width: calc(100% - 16px); /* Ensures about 8px padding on each side */
+    }
+
+    /* Adjust code block padding for very small screens */
+    .code-block {
+        padding: 8px 12px;
+    }
+    .code-block pre {
+        padding-top: 22px; /* Adjust for smaller button */
+        font-size: 0.8rem;
+    }
+    .code-copy-btn {
+        padding: 3px 6px;
+        font-size: 0.7rem;
+    }
+}
+
+/* --- NEW Media Query for Extremely Small Mobile Devices (e.g., iPhone SE, older Android) --- */
+@media (max-width: 360px) {
+    .chat-header {
+        font-size: 0.95rem; /* Slightly smaller header text for tiny screens */
+        padding: 8px 10px; /* Further reduce header padding */
+    }
+
+    .chat-header button {
+        font-size: 0.9rem;
+        padding: 3px 6px;
+    }
+
+    .sidebar {
+        width: 200px; /* Even narrower sidebar for very small screens */
+    }
+
+    .chat-container {
+        padding: 12px 6px; /* Further reduce chat container padding */
+        gap: 10px; /* Reduced gap between messages */
+    }
+
+    .prompt-area {
+        padding: 8px; /* Even less padding around the prompt area */
+        gap: 4px; /* Even smaller gap between elements */
+    }
+
+    .prompt-area input[type="text"] {
+        padding: 8px;
+        font-size: 0.85rem;
+    }
+
+    .prompt-area button,
+    .prompt-area form button { /* Target all buttons for padding */
+        padding: 6px; /* Reduced button padding */
+    }
+
+    .prompt-area button img,
+    .prompt-area form button img { /* Target all button images */
+        width: 16px; /* Smaller image size */
+        height: 16px;
+    }
+
+    .bubble {
+        font-size: 0.8rem; /* Even smaller font for bubbles */
+        padding: 9px 12px; /* Adjust bubble padding */
+    }
+
+    .user-chat-box, .ai-chat-box {
+        max-width: calc(100% - 12px); /* Ensures about 6px padding on each side */
+    }
+
+    .code-block {
+        padding: 6px 10px;
+    }
+    .code-block pre {
+        padding-top: 20px; /* Adjust for smaller copy button */
+        font-size: 0.75rem;
+    }
+    .code-copy-btn {
+        padding: 2px 5px;
+        font-size: 0.65rem;
+        top: 4px; /* Adjust position for smaller button */
+        right: 4px;
     }
 }
