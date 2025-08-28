@@ -1,4 +1,3 @@
-* ================== Reset + Base ================== */
 * {
   margin: 0;
   padding: 0;
@@ -54,8 +53,17 @@ body {
   color: var(--text-color);
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  /* Use dvh for more reliable viewport height calculation (newer spec) */
+  /* Fallback to vh for older browsers */
+  height: 100dvh;
+  height: 100vh; /* Fallback for browsers not supporting dvh */
   overflow: hidden; /* Prevents scrollbars for the entire page, important for chat apps */
+
+  /* Crucial Fix: Add padding for the system navigation bar (if present) */
+  /* This shifts the entire content up, making space for Android's soft keys and other UI */
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  /* You can also add env(safe-area-inset-top) if you have issues with status bar/notch on top */
+  padding-top: env(safe-area-inset-top, 0px);
 }
 
 /* ================== Header ================== */
