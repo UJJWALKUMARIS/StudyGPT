@@ -58,12 +58,8 @@ body {
   height: 100dvh;
   height: 100vh; /* Fallback for browsers not supporting dvh */
   overflow: hidden; /* Prevents scrollbars for the entire page, important for chat apps */
-
-  /* Crucial Fix: Add padding for the system navigation bar (if present) */
-  /* This shifts the entire content up, making space for Android's soft keys and other UI */
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-  /* You can also add env(safe-area-inset-top) if you have issues with status bar/notch on top */
-  padding-top: env(safe-area-inset-top, 0px);
+  /* REMOVED: padding-bottom: env(safe-area-inset-bottom, 0px); from body */
+  /* Apply safe-area-inset to specific elements instead of global body padding */
 }
 
 /* ================== Header ================== */
@@ -103,7 +99,7 @@ body {
 
 /* ================== Container ================== */
 .container {
-  flex: 1; /* Allows the container to fill remaining vertical space */
+  flex: 1; /* Allows the container to fill remaining vertical space below header */
   display: flex;
   position: relative;
   overflow: hidden; /* Prevent horizontal scroll within the main content area */
@@ -120,6 +116,9 @@ body {
   transition: transform 0.3s ease;
   z-index: 1001;
   flex-shrink: 0; /* Prevents sidebar from shrinking when content is tight */
+  /* Adjust height calc to use dvh for consistency */
+  height: calc(100dvh - 60px); /* 60px for header height */
+  height: calc(100vh - 60px); /* Fallback for older browsers */
 }
 
 .new-conversation-container {
@@ -315,7 +314,9 @@ body {
 .prompt-area {
   display: flex;
   align-items: center;
-  padding: 12px;
+  /* Adjust padding to account for system UI safe areas */
+  padding: 12px; /* Base padding */
+  padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)); /* Add system UI padding to bottom */
   border-top: 1px solid var(--border);
   background: var(--bg-color);
   gap: 8px;
@@ -398,7 +399,9 @@ body.dark ::-webkit-scrollbar-thumb {
   top: 60px; /* Below the header */
   left: 0;
   width: 100%;
-  height: calc(100vh - 60px);
+  /* Adjust height calc to use dvh for consistency */
+  height: calc(100dvh - 60px);
+  height: calc(100vh - 60px); /* Fallback for older browsers */
   background: rgba(0,0,0,0.4);
   display: none;
   z-index: 1000; /* Below sidebar, above chat content */
@@ -414,7 +417,9 @@ body.dark ::-webkit-scrollbar-thumb {
     position: fixed;
     top: 60px; /* Below the header */
     left: 0;
-    height: calc(100vh - 60px); /* Fill remaining viewport height */
+    /* Adjust height calc to use dvh for consistency */
+    height: calc(100dvh - 60px);
+    height: calc(100vh - 60px); /* Fallback for older browsers */
     transform: translateX(-100%); /* Off-canvas by default */
     border-right: 1px solid var(--border);
     box-shadow: 2px 0 12px var(--shadow);
@@ -476,7 +481,9 @@ body.dark ::-webkit-scrollbar-thumb {
     }
 
     .prompt-area {
-        padding: 10px;
+        /* Already has calc for safe-area-inset-bottom */
+        padding: 10px; /* Base padding for this size */
+        padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px)); /* Apply for this breakpoint too */
         gap: 6px; /* Reduced gap in prompt area */
     }
 
@@ -541,7 +548,9 @@ body.dark ::-webkit-scrollbar-thumb {
     }
 
     .prompt-area {
-        padding: 8px; /* Even less padding around the prompt area */
+        /* Already has calc for safe-area-inset-bottom */
+        padding: 8px; /* Base padding for this size */
+        padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px)); /* Apply for this breakpoint too */
         gap: 4px; /* Even smaller gap between elements */
     }
 
