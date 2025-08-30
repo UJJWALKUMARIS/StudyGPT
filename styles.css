@@ -59,6 +59,8 @@ body {
   height: 100dvh;
   height: 100vh; /* Fallback for browsers not supporting dvh */
   overflow: hidden; /* Prevents scrollbars for the entire page, important for chat apps */
+  /* REMOVED: padding-bottom: env(safe-area-inset-bottom, 0px); from body */
+  /* Apply safe-area-inset to specific elements instead of global body padding */
 }
 
 /* ================== Header ================== */
@@ -313,8 +315,6 @@ body {
 .prompt-area {
   display: flex;
   align-items: center;
-  /* Shift the entire prompt area up by 20px, causing it to overlap the chat above */
-  margin-top: -20px; /* NEW CHANGE HERE */
   /* Adjust padding to account for system UI safe areas */
   padding: 12px; /* Base padding */
   padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)); /* Add system UI padding to bottom */
@@ -436,8 +436,8 @@ body.dark ::-webkit-scrollbar-thumb {
   }
 
   .chat-area {
-    width: 100%;/* Chat area takes full width on mobile */
-    height: 80%;
+    width: 100%; /* Chat area takes full width on mobile */
+    height: 90%;
   }
 
   /* Adjust chat container padding for smaller screens */
@@ -484,7 +484,6 @@ body.dark ::-webkit-scrollbar-thumb {
 
     .prompt-area {
         /* Already has calc for safe-area-inset-bottom */
-        margin-top: -20px; /* Keep consistent negative margin */
         padding: 10px; /* Base padding for this size */
         padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px)); /* Apply for this breakpoint too */
         gap: 6px; /* Reduced gap in prompt area */
@@ -552,7 +551,6 @@ body.dark ::-webkit-scrollbar-thumb {
 
     .prompt-area {
         /* Already has calc for safe-area-inset-bottom */
-        margin-top: -20px; /* Keep consistent negative margin */
         padding: 8px; /* Base padding for this size */
         padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px)); /* Apply for this breakpoint too */
         gap: 4px; /* Even smaller gap between elements */
