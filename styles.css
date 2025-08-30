@@ -437,7 +437,7 @@ body.dark ::-webkit-scrollbar-thumb {
 
   .chat-area {
     width: 100%; /* Chat area takes full width on mobile */
-    height: 99%;
+    height: 96%;
   }
 
   /* Adjust chat container padding for smaller screens */
@@ -595,3 +595,4 @@ body.dark ::-webkit-scrollbar-thumb {
         right: 4px;
     }
 }
+
