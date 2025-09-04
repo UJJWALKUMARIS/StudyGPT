@@ -126,7 +126,7 @@ async function processCommand(message) {
 
 // ---------- GEMINI AI FETCH ----------
 async function fetchGeminiAI(prompt) {
-    const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=";
+    const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key="AIzaSyBx_1zTjVkpYrPHgU8spzrtiVVk4IiTv_0";
 
     let responseText = "I'm sorry, I couldn't generate a response.";
 
@@ -148,3 +148,4 @@ async function fetchGeminiAI(prompt) {
 
     return responseText;
 }
+
