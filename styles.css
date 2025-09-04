@@ -595,5 +595,42 @@ body.dark ::-webkit-scrollbar-thumb {
         right: 4px;
     }
 }
+/* === Responsive Chat Avatar === */
 
+/* Default avatar (desktop/tablet) */
+.chat-avatar {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-top: 2px;
+  box-shadow: 0 1px 3px var(--shadow);
+}
 
+/* Small screens (up to 768px) */
+@media (max-width: 768px) {
+  .chat-avatar {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+  }
+}
+
+/* Very small screens (up to 400px) */
+@media (max-width: 400px) {
+  .chat-avatar {
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+  }
+}
+
+/* Extremely small screens (up to 360px) */
+@media (max-width: 360px) {
+  .chat-avatar {
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+  }
+}
