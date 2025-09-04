@@ -128,7 +128,7 @@ async function processCommand(message) {
 
 // ---------- GEMINI AI FETCH ----------
 async function fetchGeminiAI(prompt) {
-    const API_KEY = "AIzaSyBx_1zTjVkpYrPHgU8spzrtiVVk4IiTv_0"; // ✅ your key as a string
+    const API_KEY = "AIzaSyBx_1zTjVkpYrPHgU8spzrtiVVk4IiTv_0"; // ✅ keep inside quotes
     const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
 
     let responseText = "I'm sorry, I couldn't generate a response.";
@@ -141,9 +141,14 @@ async function fetchGeminiAI(prompt) {
         });
 
         let data = await response.json();
+        console.log("Gemini API response:", data); // ✅ Debugging log
 
-        if (data && data.candidates && data.candidates.length > 0) {
+        // Robust parsing (handles different response formats)
+        if (data?.candidates?.[0]?.content?.parts?.[0]?.text) {
             responseText = data.candidates[0].content.parts[0].text;
+        } 
+        else if (data?.candidates?.[0]?.output?.[0]) {
+            responseText = data.candidates[0].output[0];
         }
     } catch (error) {
         console.error("Error fetching AI response:", error);
