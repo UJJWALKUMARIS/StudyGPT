@@ -23,7 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
             speak("Please speak any text.");
         } else {
             isSpeechDetected = true;
-            content.innerHTML += `<p><strong>You:</strong> ${transcript}</p>`;
+            addMessage("You", transcript);
             processCommand(transcript.toLowerCase());
         }
     };
@@ -52,19 +52,43 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
+// ---------- Add Message Helper ----------
+function addMessage(sender, text) {
+    let content = document.querySelector("#css");
+    if (content) {
+        content.innerHTML += `<p><strong>${sender}:</strong> ${text}</p>`;
+        content.scrollTop = content.scrollHeight; // auto scroll
+    }
+}
+
 // ---------- SPEAK FUNCTION ----------
 function speak(text) {
     window.speechSynthesis.cancel();
 
-    let text_speak = new SpeechSynthesisUtterance(text);
+    // Clean text before speaking
+    let cleaned = text
+        .replace(/\*\*/g, "")
+        .replace(/[_#`~]/g, "")
+        .replace(/\$/g, "")
+        .replace(/\{.*?\}/g, "")
+        .trim();
+
+    let text_speak = new SpeechSynthesisUtterance(cleaned);
     text_speak.rate = 1;
     text_speak.pitch = 1;
     text_speak.volume = 1;
     text_speak.lang = "en-IN";
+
+    // pick best voice
+    let voices = window.speechSynthesis.getVoices();
+    let preferred = voices.find(v => v.lang === "en-IN") 
+                 || voices.find(v => v.lang.startsWith("en")) 
+                 || voices[0];
+    if (preferred) text_speak.voice = preferred;
+
     window.speechSynthesis.speak(text_speak);
 
-    let content = document.querySelector("#css");
-    if (content) content.innerHTML += `<p><strong>AI:</strong> ${text}</p>`;
+    addMessage("AI", cleaned);
 }
 
 // ---------- PROCESS COMMAND ----------
@@ -128,7 +152,7 @@ async function processCommand(message) {
 
 // ---------- GEMINI AI FETCH ----------
 async function fetchGeminiAI(prompt) {
-    const API_KEY = "AIzaSyBx_1zTjVkpYrPHgU8spzrtiVVk4IiTv_0"; // ✅ keep inside quotes
+    const API_KEY = "AIzaSyBx_1zTjVkpYrPHgU8spzrtiVVk4IiTv_0"; 
     const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
 
     let responseText = "I'm sorry, I couldn't generate a response.";
@@ -141,13 +165,12 @@ async function fetchGeminiAI(prompt) {
         });
 
         let data = await response.json();
-        console.log("Gemini API response:", data); // ✅ Debugging log
+        console.log("Gemini API response:", data);
 
-        // Robust parsing (handles different response formats)
+        // robust parsing
         if (data?.candidates?.[0]?.content?.parts?.[0]?.text) {
             responseText = data.candidates[0].content.parts[0].text;
-        } 
-        else if (data?.candidates?.[0]?.output?.[0]) {
+        } else if (data?.candidates?.[0]?.output?.[0]) {
             responseText = data.candidates[0].output[0];
         }
     } catch (error) {
