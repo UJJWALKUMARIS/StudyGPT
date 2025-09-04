@@ -3,8 +3,8 @@ document.addEventListener("DOMContentLoaded", () => {
     let content = document.querySelector("#css");
     let voice = document.querySelector("#voice");
 
-    if (!btn) {
-        console.error("Button with ID 'btn' not found! Check your HTML.");
+    if (!btn || !content || !voice) {
+        console.error("❌ Missing HTML elements! Make sure you have: #btn, #css, #voice in your HTML.");
         return;
     }
 
@@ -23,7 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
             speak("Please speak any text.");
         } else {
             isSpeechDetected = true;
-            if (content) content.innerHTML += `<p><strong>You:</strong> ${transcript}</p>`;
+            content.innerHTML += `<p><strong>You:</strong> ${transcript}</p>`;
             processCommand(transcript.toLowerCase());
         }
     };
@@ -72,8 +72,10 @@ async function processCommand(message) {
     let btn = document.querySelector("#btn");
     let voice = document.querySelector("#voice");
 
-    btn.style.display = "flex";
-    voice.style.display = "none";
+    if (btn && voice) {
+        btn.style.display = "flex";
+        voice.style.display = "none";
+    }
 
     if (message.includes("hello") || message.includes("hey")) {
         speak("Hello, how can I help you?");
@@ -126,7 +128,7 @@ async function processCommand(message) {
 
 // ---------- GEMINI AI FETCH ----------
 async function fetchGeminiAI(prompt) {
-    const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key="AIzaSyBx_1zTjVkpYrPHgU8spzrtiVVk4IiTv_0";
+    const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyBx_1zTjVkpYrPHgU8spzrtiVVk4IiTv_0";
 
     let responseText = "I'm sorry, I couldn't generate a response.";
 
@@ -148,4 +150,3 @@ async function fetchGeminiAI(prompt) {
 
     return responseText;
 }
-
