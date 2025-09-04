@@ -1,5 +1,5 @@
 // ================= CONFIG =================
-const API_KEY = "YOUR_API_KEY"; // replace with your Gemini key (better use backend for security!)
+const API_KEY = "AIzaSyBx_1zTjVkpYrPHgU8spzrtiVVk4IiTv_0"; // replace with your Gemini key (better use backend for security!)
 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
 
 // ================= DOM ELEMENTS =================
@@ -294,3 +294,4 @@ if (!conversations.length) {
   renderSidebar();
   renderConversation();
 }
+
