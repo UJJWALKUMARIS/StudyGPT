@@ -1,5 +1,5 @@
 // ================= CONFIG =================
-const API_KEY = "AIzaSyDsGXPA8ZldN2J5ZmkS8fwr0fT85el7Mo8"; // replace with your Gemini API key
+const API_KEY = "AIzaSyANORr5RhlPOiknVFd4I8SC_vlD06Wun4g"; // replace with your Gemini API key
 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
 
 // ================= DOM ELEMENTS =================
@@ -292,6 +292,7 @@ overlay.addEventListener("click", () => {
   document.querySelector(".sidebar").classList.remove("active");
   overlay.classList.remove("active");
 });
+
 
 
 
