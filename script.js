@@ -1,5 +1,5 @@
 // ================= CONFIG =================
-const API_KEY = "AIzaSyBCrWDt-mjhXn2a5csnWNdemlyH3LVRWok"; // replace with your Gemini API key
+const API_KEY = "AIzaSyBCrWDt-mjhXn2a5csnWNdemlyH3LVRWok";
 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
 
 // ================= DOM ELEMENTS =================
@@ -77,13 +77,12 @@ function addMessageToChat(text, role, file = null) {
 
   const avatar = document.createElement("img");
   avatar.className = "chat-avatar";
-  avatar.src = role === "user" ? "user.png" : "ai.avif"; // ⚠️ add user.png image
+  avatar.src = role === "user" ? "user.png" : "ai.avif";
   box.appendChild(avatar);
 
   const bubble = document.createElement("div");
   bubble.className = "bubble";
 
-  // Parse markdown + KaTeX
   let contentHTML = marked.parse(text);
   try {
     bubble.innerHTML = contentHTML;
@@ -92,14 +91,13 @@ function addMessageToChat(text, role, file = null) {
         { left: "$$", right: "$$", display: true },
         { left: "$", right: "$", display: false },
         { left: "\\(", right: "\\)", display: false },
-        { left: "\\[", right: "\\]", display: true },
-      ],
+        { left: "\\[", right: "\\]", display: true }
+      ]
     });
   } catch {
     bubble.innerHTML = contentHTML;
   }
 
-  // Attach image if present
   if (file) {
     const imgEl = document.createElement("img");
     imgEl.src = `data:${file.mime_type};base64,${file.data}`;
@@ -107,18 +105,15 @@ function addMessageToChat(text, role, file = null) {
     bubble.appendChild(imgEl);
   }
 
-  // ✅ Add copy button under AI responses
   if (role !== "user") {
     const copyBtn = document.createElement("button");
     copyBtn.className = "ai-copy";
     copyBtn.textContent = "Copy response";
-    copyBtn.addEventListener("click", () => {
-      const plain = bubble.innerText; // only text (no HTML tags)
-      navigator.clipboard.writeText(plain).then(() => {
-        copyBtn.textContent = "Copied!";
-        setTimeout(() => (copyBtn.textContent = "Copy response"), 1500);
-      });
-    });
+    copyBtn.onclick = () => {
+      navigator.clipboard.writeText(bubble.innerText);
+      copyBtn.textContent = "Copied!";
+      setTimeout(() => (copyBtn.textContent = "Copy response"), 1500);
+    };
     bubble.appendChild(copyBtn);
   }
 
@@ -133,63 +128,67 @@ async function generateResponse(aiChatBox, message) {
   const conv = conversations.find((c) => c.id === selectedConversationId);
   if (!conv) return;
 
-  const parts = conv.messages.map((m) => ({
-    text: `${m.role === "user" ? "User" : "AI"}: ${m.text}`,
+  // CORRECT GEMINI FORMAT
+  const formattedMessages = conv.messages.map((m) => ({
+    role: m.role === "user" ? "user" : "model",
+    parts: [{ text: m.text }]
   }));
-  if (message.file?.data) parts.push({ inline_data: message.file });
+
+  // last message file support
+  if (message.file?.data) {
+    formattedMessages.push({
+      role: "user",
+      parts: [{ inline_data: message.file }]
+    });
+  }
 
   try {
     const res = await fetch(API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ contents: [{ parts }] }),
+      body: JSON.stringify({ contents: formattedMessages })
     });
+
     const data = await res.json();
 
-    let apiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || "⚠️ No response";
+    let apiResponse =
+      data.candidates?.[0]?.content?.parts?.[0]?.text || "⚠️ No response";
 
-    // quick custom replies
-    const userText = message.text.toLowerCase();
-    if (userText.includes("hello")) apiResponse = "Hello, how can I help you?";
-    if (userText.includes("who are you")) apiResponse = "I am StudyGPT, created by Ujjwal Kumar.";
+    // smart short custom replies
+    const u = message.text.toLowerCase();
+    if (u === "hello") apiResponse = "Hello! 👋 How can I help you today?";
+    if (u.includes("who are you"))
+      apiResponse = "I am StudyGPT, created by Ujjwal Kumar 💡.";
 
     const aiMessage = { role: "ai", text: apiResponse };
     conv.messages.push(aiMessage);
     saveConversations();
 
-    // ✅ Render AI answer with markdown & KaTeX
-    let contentHTML = marked.parse(apiResponse);
+    let html = marked.parse(apiResponse);
+    textEl.innerHTML = html;
     try {
-      textEl.innerHTML = contentHTML;
       renderMathInElement(textEl, {
         delimiters: [
           { left: "$$", right: "$$", display: true },
-          { left: "$", right: "$", display: false },
-          { left: "\\(", right: "\\)", display: false },
-          { left: "\\[", right: "\\]", display: true },
-        ],
+          { left: "$", right: "$", display: false }
+        ]
       });
-    } catch {
-      textEl.innerHTML = contentHTML;
-    }
+    } catch {}
 
-    // ✅ Add copy button below
     const copyBtn = document.createElement("button");
     copyBtn.className = "ai-copy";
     copyBtn.textContent = "Copy response";
-    copyBtn.addEventListener("click", () => {
-      const plain = textEl.innerText;
-      navigator.clipboard.writeText(plain).then(() => {
-        copyBtn.textContent = "Copied!";
-        setTimeout(() => (copyBtn.textContent = "Copy response"), 1500);
-      });
-    });
+    copyBtn.onclick = () => {
+      navigator.clipboard.writeText(textEl.innerText);
+      copyBtn.textContent = "Copied!";
+      setTimeout(() => (copyBtn.textContent = "Copy response"), 1500);
+    };
     textEl.appendChild(copyBtn);
   } catch (e) {
     console.error(e);
-    textEl.innerHTML = "⚠️ Error fetching response.";
+    textEl.innerHTML = "⚠️ Error while contacting server.";
   } finally {
-    chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: "smooth" });
+    chatContainer.scrollTop = chatContainer.scrollHeight;
     image.src = "img.svg";
     image.classList.remove("size");
   }
@@ -209,8 +208,9 @@ function handleUserMessage() {
   const userMessage = {
     role: "user",
     text: messageText,
-    file: user.file.data ? { mime_type: user.file.mime_type, data: user.file.data } : null,
+    file: user.file.data ? { mime_type: user.file.mime_type, data: user.file.data } : null
   };
+
   conv.messages.push(userMessage);
   saveConversations();
 
@@ -221,15 +221,14 @@ function handleUserMessage() {
   image.src = "img.svg";
   image.classList.remove("size");
 
-  // AI typing placeholder
   const aiChatBox = document.createElement("div");
   aiChatBox.className = "ai-chat-box";
   aiChatBox.innerHTML = `
-    <img src="ai.avif" class="chat-avatar" />
-    <div class="bubble"><img src="loding.gif" alt="loading" width="40"></div>
+    <img src="ai.avif" class="chat-avatar"/>
+    <div class="bubble"><img src="loding.gif" width="40"></div>
   `;
   chatContainer.appendChild(aiChatBox);
-  chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: "smooth" });
+  chatContainer.scrollTop = chatContainer.scrollHeight;
 
   generateResponse(aiChatBox, userMessage);
 }
@@ -238,21 +237,30 @@ function handleUserMessage() {
 imageInput.addEventListener("change", () => {
   const file = imageInput.files[0];
   if (!file) return;
+
   const reader = new FileReader();
   reader.onload = (e) => {
     const base64String = e.target.result.split(",")[1];
     user.file = { mime_type: file.type, data: base64String };
-    image.src = `data:${user.file.mime_type};base64,${user.file.data}`;
+    image.src = e.target.result;
     image.classList.add("size");
   };
   reader.readAsDataURL(file);
 });
+
 imageBtn.addEventListener("click", () => imageInput.click());
 
 // ================= EVENT LISTENERS =================
 submitBtn.addEventListener("click", handleUserMessage);
-prompt.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); handleUserMessage(); } });
+prompt.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    handleUserMessage();
+  }
+});
+
 newConversationBtn.addEventListener("click", createNewConversation);
+
 clearChatBtn.addEventListener("click", () => {
   if (!selectedConversationId) return;
   const idx = conversations.findIndex((c) => c.id === selectedConversationId);
@@ -267,7 +275,11 @@ clearChatBtn.addEventListener("click", () => {
 });
 
 // ================= INIT =================
-if (!conversations.length) createNewConversation(); else { renderSidebar(); renderConversation(); }
+if (!conversations.length) createNewConversation();
+else {
+  renderSidebar();
+  renderConversation();
+}
 
 // ================= DARK MODE =================
 if (localStorage.getItem("theme") === "dark") {
@@ -277,13 +289,15 @@ if (localStorage.getItem("theme") === "dark") {
 darkToggle.addEventListener("click", () => {
   document.body.classList.toggle("dark");
   if (document.body.classList.contains("dark")) {
-    darkToggle.textContent = "🌞"; localStorage.setItem("theme", "dark");
+    darkToggle.textContent = "🌞";
+    localStorage.setItem("theme", "dark");
   } else {
-    darkToggle.textContent = "🌙"; localStorage.setItem("theme", "light");
+    darkToggle.textContent = "🌙";
+    localStorage.setItem("theme", "light");
   }
 });
 
-// ================= SIDEBAR TOGGLE (Mobile) =================
+// ================= SIDEBAR TOGGLE =================
 menuToggle.addEventListener("click", () => {
   document.querySelector(".sidebar").classList.toggle("active");
   overlay.classList.toggle("active");
@@ -292,10 +306,3 @@ overlay.addEventListener("click", () => {
   document.querySelector(".sidebar").classList.remove("active");
   overlay.classList.remove("active");
 });
-
-
-
-
-
-
-
