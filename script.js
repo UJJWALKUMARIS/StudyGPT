@@ -1,6 +1,6 @@
 // ================= CONFIG =================
 const API_KEY = "AIzaSyBCrWDt-mjhXn2a5csnWNdemlyH3LVRWok";
-const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
+const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
 
 // ================= DOM ELEMENTS =================
 const prompt = document.getElementById("prompt");
@@ -306,3 +306,4 @@ overlay.addEventListener("click", () => {
   document.querySelector(".sidebar").classList.remove("active");
   overlay.classList.remove("active");
 });
+
